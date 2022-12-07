@@ -1,6 +1,7 @@
 # Sf2toOrba2
 Tool for converting SF2  instruments to Orba2 samples
 
+requires sf2utils library.
 
 
 This is an early PoC, that probably works only for some specific cases.
