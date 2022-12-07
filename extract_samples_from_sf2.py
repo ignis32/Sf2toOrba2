@@ -116,8 +116,8 @@ with open(filepath, 'rb') as sf2_file:
             Loop status  {bag.sample_loop}
             loop start:  {bag.sample.start_loop}
             loop stop:   {bag.sample.end_loop}
-            cloop start : {bag.cooked_loop_start}
-            cloop stop :  {bag.sample.end_loop +  bag[Sf2Gen.OPER_END_LOOP_ADDR_OFFSET].short    }
+            * cloop start : {bag.cooked_loop_start}
+            * cloop stop :  {bag.sample.end_loop +  bag[Sf2Gen.OPER_END_LOOP_ADDR_OFFSET].short    }
             cloop stop offset:  { bag[Sf2Gen.OPER_END_LOOP_ADDR_OFFSET].short }
             
             """)
@@ -140,30 +140,4 @@ with open(filepath, 'rb') as sf2_file:
            
             58 overridingRootKey This parameter represents the MIDI key number at which the sample is to be played back at its original sample rate. If not present, or if present with a value of -1, then the sample header parameter OriginalKey is used in its place. If it is present in the range 0-127, then the indicated key number will cause the sample to be played back at its sample header Sample Rate. For example, if the sample were a recording of a piano middle C (Original Key = 60) at a sample rate of 22.050 kHz, and Root Key were set to 69, then playing MIDI key number 69 (A above middle C) would cause a piano note of pitch middle C to be heard.
             '''
-    # for idx in range(start_idx ,end_idx-1):
-    #     sample = sf2.samples[idx]
-    #     print()
-    #     print (f"Sample name: {sample.name}" )
-    #     print (f"start: {sample.start}  end: {sample.end}  loop start: {sample.start_loop} loop end: {sample.end_loop}")
-    #     print (f"original pitch: {sample.original_pitch}  pitch correction: {sample.pitch_correction} ")
-    #     print (f"bits: {sample.sample_width*8}  sample rate: {sample.sample_rate} ")
-
-    #     out_filepath = os.path.join(target_dir,'out-%d.full.wav'%(idx))
-    #     sample.export(out_filepath)
-    
-#------------
-        # out_filepath = os.path.join(target_dir,'out-%d.wav'%(idx))
-        # sample.export(out_filepath)
-
-        # with open(out_filepath,'rb') as fp:
-        #     raw = fp.read()
-    
-        # name = '%s - %dHz %dbit - 1.normal'%(sample.name,sample.sample_rate,sample.sample_width*8)    
-        # out_filepath = os.path.join(target_dir,'%s.wav'%(name))
-        # with open(out_filepath,'bw+') as fp:
-        #     fp.write(raw[0 :(sample.start_loop-1) *sample.sample_rate])
-
-        # name = '%s - %dHz %dbit - 2.loop'%(sample.name,sample.sample_rate,sample.sample_width*8)    
-        # out_filepath = os.path.join(target_dir,'%s.wav'%(name))
-        # with open(out_filepath,'bw+') as fp:
-        #     fp.write(raw[sample.start_loop *sample.sample_width:sample.end_loop*sample.sample_width])  
+ 
