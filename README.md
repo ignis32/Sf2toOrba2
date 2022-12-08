@@ -42,7 +42,7 @@ uuid is generated from instrument_name, root note, and velocity
 
 ## Samples are exported as below:
 
-SF2-<Instrument name>_<Note>_<Velocity range top>_<LoopStart>_<LoopEnd>_<UUID>.wav     
+    SF2-<Instrument name>_<Note>_<Velocity range top>_<LoopStart>_<LoopEnd>_<UUID>.wav     
 
 ## What is not implemented:
 
