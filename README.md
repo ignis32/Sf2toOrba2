@@ -22,9 +22,7 @@ e.g,:
 
 If the same sample is explicitly binded to the different velocity ranges it will be exported multiple times.
 This might be a problem for SF2 instruments that use velocity for alternation between samples, to provide playing "pseudo random" sample variants.
-(for example, each even velocity plays sample 1 and each odd velocity plays sample 2)
-
-If same sample is explicitly binded to different note ranges - multiple export will happen too.
+(for example, each even velocity plays sample 1 and each odd velocity plays sample  
 
 ## What is implemented:
     
@@ -51,7 +49,7 @@ Sample related quite vital stuff that might affect resulting orba preset consist
 * Sample pitch tuning is ignored 
 * Key range is ignored (only root note information is used)
 
-
+Other stuff:
 
 * Modulators are ignored
 * Envelopes are ignored
