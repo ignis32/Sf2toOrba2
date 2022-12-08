@@ -9,6 +9,7 @@ import os
 from sf2utils.sf2parse import Sf2File
 from sf2utils.generator import Sf2Gen
 import hashlib
+import slugify #  install as  python-slugify  (regular slugify is something outdated)
 
 # There is no strict assignment of the note 60 to certain octave. 
 # https://petervodden.blog/portfolio/middle-c-c3-or-c4/
@@ -16,16 +17,15 @@ import hashlib
 # goddamn standards cannot even agree on what the 60 note is. 
 
 # Most popular
+MIDDLE_C_IS_C5 =  0
 MIDDLE_C_IS_C4 = -1   
 MIDDLE_C_IS_C3 = -2  
 
-
 #filepath = r'Hang-D-minor-20220330.sf2'
 #filepath = r'(130 sounds) 27mg_Symphony_Hall_Bank.SF2'
-
 filepath = r'ACCORDION.sf2'
 target_dir = r'output'
-OCTAVE_SHIFT= MIDDLE_C_IS_C3   
+OCTAVE_SHIFT= MIDDLE_C_IS_C5   
 
 
 def number_to_note(number: int):
@@ -49,32 +49,27 @@ def ensure_folder(path):
         pass
                                     #sample_data
 def export_sample(instrument_name, sd):
-
-    
+   
     folder_path = f"{target_dir}/{instrument_name}"
-
     ensure_folder(folder_path)
 
     uuid=md5sum(f"{instrument_name}_{sd['root_note_text']}_{sd['velocity_range_top']}")
-
     #NamePart1<_namePart2_namePartn>_Note<_Velocity><_LoopStart><_LoopEnd><_UUID>.wav    Subskybox's naming convetion.
-    filename = f"SF2-{instrument_name}_{sd['root_note_text']}_{sd['velocity_range_top']}_{sd['loop_start_offset']}_{sd['loop_end_offset']}_{uuid}.wav"
+    filename = f"{instrument_name}_{sd['root_note_text']}_{sd['velocity_range_top']}_{sd['loop_start_offset']}_{sd['loop_end_offset']}_{uuid}.wav"
 
     out_filepath = os.path.join(folder_path, filename)
     sd['sample'].export(out_filepath)
 
-
-
+             
+######-----------------------------------------------------------------
 
 with open(filepath, 'rb') as sf2_file:
     
     #use sf2util library to parse sf2 bank
     sf2 = Sf2File(sf2_file)
-
     print ("\n\n\n")
     print (f"number of instruments in the sf2: {len(sf2.instruments)-1}")   #/// there is an additional EOI fake instrument in the end, marks end of instrument list
     
-
     # instrument - In the SoundFont standard, a collection of zones which represents the sound of a single musical instrument or sound effect set.
     # one sf2 file might contain multiple instruments.
 
@@ -92,15 +87,16 @@ with open(filepath, 'rb') as sf2_file:
       
         for bag in instrument.bags:
             if  (bag.sample) == None:
- 
                 print("no sample bag")  # I am not sure why these appear in bags, but whatever. most probably is has something to do with global zones.
                 continue
             #print (bag.pretty_print())
             
-            instrument_name = (instrument.name).strip()  
+            instrument_name = "SF2-"+slugify.slugify(instrument.name,lowercase=False)  # this name is used as a folder name, it should be valid for filesystem
      
 
+               
             sample_data = {
+                'instrument':         instrument_name,
                 'sample_name':        bag.sample.name,        
                 'sample':             bag.sample,            #object, that can be exported as wav later.
                 'key_range':          bag.key_range, 
@@ -109,8 +105,10 @@ with open(filepath, 'rb') as sf2_file:
                 'velocity_range_top': bag.velocity_range[-1] if bag.velocity_range != None else 127,  # used for Orba2 velocity threshold
                 'root_note':                         bag.base_note if bag.base_note != None  else (bag.sample.DEFAULT_PITCH) ,  # used to assign sample to note. base_note (root note override) might be absent, in this case default sample's pitch kicks in.
                 'root_note_text':     number_to_note(bag.base_note if bag.base_note != None  else (bag.sample.DEFAULT_PITCH)),  # used to name a sample file 
-                'loop_start_offset':  bag.cooked_loop_start , # when note is played for long, it goes to the loop. This loop is a part of initial sample.
-                'loop_end_offset':    bag.sample.end_loop +  bag[Sf2Gen.OPER_END_LOOP_ADDR_OFFSET].short,  # seems like end loop offset is counted from the loop start using negative values.
+                'loop_enabled': bag.sample_loop,
+                'loop_enabled_on_noteoff': bag.sample_loop_on_noteoff,
+                'loop_start_offset':  bag.cooked_loop_start if bag.sample_loop !=None else 0, # when note is played for long, it goes to the loop. This loop is a part of initial sample.
+                'loop_end_offset':    bag.cooked_loop_end   if bag.sample_loop !=None  else 0,  # seems like end loop offset is counted from the loop start using negative values.
                 'sample-rate': bag.sample.sample_rate,  # required for the future sample rate  pitch compensation
                 'pitch_correction_coefficient':  48000/bag.sample.sample_rate
             }
@@ -120,7 +118,7 @@ with open(filepath, 'rb') as sf2_file:
 
             
            
-
+# some quotes for sf2 specs
             
             #  43 keyRange This is the minimum and maximum MIDI key number values for which this preset zone or instrument zone is active. The LS byte indicates the highest and the MS byte the lowest valid key. The keyRange enumerator is optional, but when it does appear, it must be the first generator in the zone generator list.
             #  44 velRange This is the minimum and maximum MIDI velocity values for which this preset zone or instrument zone is active. The LS byte indicates the highest and the MS byte the lowest valid velocity. The velRange enumerator is optional, but when it does appear, it must be preceded only by keyRange in the zone generator list.    
