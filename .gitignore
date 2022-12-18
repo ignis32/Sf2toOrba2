@@ -1,3 +1,8 @@
 output
 *.sf2
 orba_sample_set*
+*.artipreset
+archive
+*.log
+artipreset
+__pycache__
