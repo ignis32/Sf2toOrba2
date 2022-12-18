@@ -1,5 +1,5 @@
 from typing import List, Optional
-from enum import Enum
+#from enum import Enum
 
 import  xmltodict
 import sys
@@ -7,7 +7,7 @@ import logging
 
 import re
 
-# nice tool, btw:
+# nice tool, btw, initial classes had been generated with
 #https://jsonformatter.org/xml-to-python
 
 
@@ -17,8 +17,6 @@ def camel_to_snake(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
 
- 
-
 def to_snake_case(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     name = re.sub('__([A-Z])', r'_\1', name)
@@ -27,6 +25,18 @@ def to_snake_case(name):
 
 
 
+def to_camel_case(snake_str):
+    components = snake_str.split('_')
+    # We capitalize the first letter of each component except the first one
+    # with the 'title' method and join them together.
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+def to_pascal_case(snake_str):
+    components = snake_str.split('_')
+    # We capitalize the first letter of each component except the first one
+    # with the 'title' method and join them together.
+    return components[0].title() + ''.join(x.title() for x in components[1:])
+ 
 
 # base class that adds same functions to all other classes, each one of them representing a part of the preset XML.
 class OrbaPresetElementBaseClass:
@@ -36,16 +46,19 @@ class OrbaPresetElementBaseClass:
     def __init__(self,data=None):
         
         
-        logging.debug(f"init class{self.__class__.__name__}")
-        if data != None:
-            #self.aux_data=data
-            self.init_from_dict(data)
+        logging.debug(f"init  {self.__class__.__name__}")
         
-    def init_from_dict(self, aux_data):
-        logging.debug(f"init_from_dict class{self.__class__.__name__}")
+        # #PresetEntry does not have incoming json data yet
+        # if   self.__class__.__name__  != "PresetEntry":
+        # #if data != None:   # works too, but intention is not so clear
+        self.init_from_dict(data)
+        
 
+    # object loads data from the dict structure, and recusively does the same for each class-implemented propery,
+    # passing relevant part of the dict further to next objects.
 
-        #if type(aux_data) == dict:
+    def init_from_dict(self, aux_data):  
+        logging.debug(f"init_from_dict class {self.__class__.__name__}")
 
         #muliple loops are ugly, but they allow more meaningful  linear debug output
 
@@ -77,10 +90,11 @@ class OrbaPresetElementBaseClass:
                         python_class_name = element_name
                         logging.debug(f"found {python_class_name} class")
                     else:
-                        # oh, yeah, name collision handling.  We expect something like Compatibility class to exist, 
-                        # but actual name is  like  SynthPatchCompatibility   or ModifierChainCompatibility depending on the parent element.  
+                        # oh, yeah, name collision handling.  We expect something like Compatibility class to exist as it is in XML, 
+                        # but actual class name is  like  SynthPatchCompatibility   or ModifierChainCompatibility depending on the parent element class name.  
+                        # as soon as there are tons of different Compatibility elements
                          
-                        parent_element_prefix=self.__class__.__name__.replace("class","")
+                        parent_element_prefix=self.__class__.__name__ #.replace("class","")
                         python_class_name =  f"{parent_element_prefix}{element_name}"     
                         logging.debug(f"not found {element_name} class, assuming name collision and actual name as {python_class_name}")           
                     
@@ -102,7 +116,46 @@ class OrbaPresetElementBaseClass:
                             element.append(sub_element)
                         setattr(self, python_object_element_name,  element)
                     
-                    
+    def get_as_dict(self):
+        logging.debug(f"get_as_dict class {self.__class__.__name__}")
+        data = self.__dict__.copy()  # we cannot modify original dict keys on the fly
+        
+        for i in self.__dict__.keys():
+            
+             #trying to distingush elements, elements list and attributes  and convert back to camelcase
+         
+            # attribute. 
+            if type(data[i]) == str or type(data[i]) == int:             
+                 data[f"@{to_camel_case(i)}"] =   (data.pop(i) )   #  just rename according to xmltodict convention, by removing old element and adding new             
+            
+            # list of elements
+            elif type(data[i]) == list :    
+               
+                data.pop(i)     # remove old name                             
+                data_list = []
+                for sub_element in self.__dict__[i]: # iterating list of elements
+                    data_list.append(sub_element.get_as_dict() )
+                
+                data[f"{to_pascal_case(i)}"] =  data_list
+
+            elif isinstance(data[i], OrbaPresetElementBaseClass):
+                data.pop(i)
+                data[f"{to_pascal_case(i)}"] =       getattr(self,  i).get_as_dict()     # element
+                #(data.pop(i) )               # attribute
+
+            else:
+                raise(f"Do not know what to do with {data[i]}  {type(data[i])}")
+
+
+        return data
+    
+    def get_as_xml(self):
+        return xmltodict.unparse({self.__class__.__name__:self.get_as_dict()}, pretty=True)
+
+    def export_as_xml(self, filename):
+        with open(filename, "w") as file1:
+        # Writing data to a file
+            file1.write(self.get_as_xml())
                     
                  
         
@@ -361,8 +414,10 @@ class PresetEntry(OrbaPresetElementBaseClass):
             aux_data = xmltodict.parse(fd.read())['PresetEntry']
         self.init_from_dict(aux_data)
    
-    def _init_(self):
-        pass
+    def __init__(self,data=None):
+        logging.debug(f"init  {self.__class__.__name__}")
+ 
+    #     self.init_from_dict(data)
 
 class Welcome10:
     preset_entry: PresetEntry

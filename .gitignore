@@ -6,3 +6,4 @@ archive
 *.log
 artipreset
 __pycache__
+*.xml
