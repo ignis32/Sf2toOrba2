@@ -9,6 +9,8 @@ import re
 
 # nice tool, btw, initial classes had been generated with
 #https://jsonformatter.org/xml-to-python
+# another similar but did not use it
+#https://codebeautify.org/xml-to-python-pojo-generator
 
 
 # helper functions
@@ -66,7 +68,7 @@ class OrbaPresetElementBaseClass:
         for xml_part_name in  aux_data.keys():         
             if xml_part_name.startswith('@'):                 
                     attribute_name=xml_part_name
-                    python_object_attribute_name=camel_to_snake( attribute_name.replace("@",""))
+                    python_object_attribute_name=     ( attribute_name.replace("@",""))  #no snake anymore
 
                     logging.debug(f"setting {self.__class__.__name__} attribute {xml_part_name}=\'{aux_data[attribute_name]}\'")
                     setattr(self, python_object_attribute_name ,  aux_data[attribute_name])  
@@ -126,7 +128,7 @@ class OrbaPresetElementBaseClass:
          
             # attribute. 
             if type(data[i]) == str or type(data[i]) == int:             
-                 data[f"@{to_camel_case(i)}"] =   (data.pop(i) )   #  just rename according to xmltodict convention, by removing old element and adding new             
+                 data[f"@{(i)}"] =   (data.pop(i) )   #  just rename according to xmltodict convention, by removing old element and adding new             
             
             # list of elements
             elif type(data[i]) == list :    
@@ -168,58 +170,178 @@ class OrbaPresetElementBaseClass:
 
 class BezierCurvesEntry(OrbaPresetElementBaseClass):
     name: str
-    bezier_curves_data: str
+    bezierCurvesData: str
  
-
-
 class GestureCurveAssignmentsEntry(OrbaPresetElementBaseClass):
     name: str
-    curve_assignments_data: str
+    curveAssignmentsData: str
 
 class EventCurveAssignmentsEntry(OrbaPresetElementBaseClass):
     name: str
-    curve_assignments_data: str
+    curveAssignmentsData: str
 
 class ModifierChainCompatibility(OrbaPresetElementBaseClass):
-    major_version: int
-    minor_version: int
+    majorVersion: int
+    minorVersion: int
 
 class SeekerListCompatibility(OrbaPresetElementBaseClass):
-    major_version: int
-    minor_version: int
+    majorVersion: int
+    majorVersion: int
+
+class ChordModifierParams(OrbaPresetElementBaseClass):
+    majorChordList: str
+    minorChordList: str
+
+class ModifierEntry(OrbaPresetElementBaseClass):
+    chord_modifier_params: ChordModifierParams
+    chainIndex: int
+    prioIndex: int
+    modifierUuid: str
+    modifierType: str
+    eventsInSource: str
+    eventsInLength: str
+    eventsOutCurve: int
+
 
 class ModifierChain(OrbaPresetElementBaseClass):
     compatibility: ModifierChainCompatibility
-    chain_index: int
+    modifier_entry: ModifierEntry ##### appeared in chords
+    chainIndex: int
  
 class PatternEntry(OrbaPresetElementBaseClass):
     name: str
-    pattern_data: str
-    pattern_duration: int 
+    patternData: str
+    patternDuration: int 
 
 class PatternList(OrbaPresetElementBaseClass):
     pattern_entry: List[PatternEntry]
  
 class SeekerEntry(OrbaPresetElementBaseClass):
-    input_length: str
-    in_min: int
-    in_max: int
-    out_min: int
-    out_max: int
-    seeker_type: str
-    event_source: Optional[str]
-    note_offset: Optional[int]
+    inputLength: str
+    inMin: int
+    inMax: int
+    outMin: int
+    outMax: int
+    seekerType: str
+    eventSource: Optional[str]
+    noteOffset: Optional[int]
     controller: Optional[str]
-    trigger_source: Optional[str]
-    trigger_rule: Optional[str]
-    metric_sensor: Optional[str]
-    metric_selection: Optional[str]
-    max_rate: Optional[int]
+    triggerSource: Optional[str]
+    triggerRule: Optional[str]
+    metricSensor: Optional[str]
+    metricSelection: Optional[str]
+    maxRate: Optional[int]
  
 
 class SeekerList(OrbaPresetElementBaseClass):
     seeker_entry: List[SeekerEntry]
     compatibility: ModifierChainCompatibility
+
+class CymbalPatch(OrbaPresetElementBaseClass):    #only  drum stuff
+    cymbalMode: int
+    ampVelocity: int
+    pitch: int
+    color: int
+    filterCutoff: int
+    filterVelocity: int
+    filterDecay: int
+    decayRelease: int
+    decayHold: int
+    flamCount: int
+    flamRate: int
+    level: int
+    pan: int
+    fx: int
+    index: int
+
+
+class DrumPatch(OrbaPresetElementBaseClass):  #only  drum stuff
+    drumMode: int
+    ampVelocity: int
+    snapLevel: int
+    snapColor: int
+    bendDepth: int
+    bendTime: int
+    modulationRatio: int
+    modulationDetune: int
+    modulationDepth: int
+    modulationVelocityDepth: int
+    decayRelease: int
+    decayHold: int
+    ensnare: int
+    grit: int
+    flamCount: int
+    flamRate: int
+    fuzz: int
+    level: int
+    pan: int
+    tailLevel: int
+    tailDelay: int
+    tailDecay: int
+    fx: int
+    note: int
+    index: int
+
+class ShakerPatch(OrbaPresetElementBaseClass): #only  drum stuff
+    shakerMode: int
+    velocityResponse: int
+    shakeResponse: int
+    pitch: int
+    resonance: int
+    density: int
+    decay: int
+    level: int
+    pan: int
+    fx: int
+
+class SampleDrumPatch(OrbaPresetElementBaseClass):  #only drum stuff
+    index: int 
+    drumMode: int 
+    ampVelocity: int 
+    snapVelocity: int 
+    snapLevel: int 
+    snapColor: int 
+    bendVelocity: int 
+    bendDepth: int 
+    bendTime: int 
+    gainRampStart: int 
+    gainRampEnd: int 
+    gainRampTime: int 
+    clipRampStart: int 
+    clipRampEnd: int 
+    clipRampTime: int 
+    fwRampStart: int 
+    fwRampEnd: int 
+    fwRampTime: int 
+    decayRelease: int 
+    decayHold: int 
+    flamCount: int 
+    flamRate: int 
+    level: int 
+    pan: int 
+    tailLevel: int 
+    tailDelay: int 
+    tailDecay: int 
+    fx: int 
+    note: int 
+    midiNote: int 
+    priority: int 
+
+class KitPatchCompatibility(OrbaPresetElementBaseClass):  #only drum stuff
+    audioEngineMajor: int 
+    audioEngineMinor: int 
+    samplePlayback: int 
+    numDrums: int 
+    numCymbals: int 
+    numShakers: int 
+    numSampleDrums: int 
+
+
+class KitPatch(OrbaPresetElementBaseClass): #only  drum stuff
+    drum_patch: List[DrumPatch]
+    cymbal_patch: List[CymbalPatch]
+    shaker_patch: ShakerPatch
+
 
 class Pool(OrbaPresetElementBaseClass):
     USER = "User"
@@ -228,130 +350,128 @@ class Pool(OrbaPresetElementBaseClass):
 class Subdirectory(OrbaPresetElementBaseClass):
     PAN_DRUM_82301_E0_F951_DB25_C8_F25_C5548_ADD1_D45 = "PanDrum_82301e0f951db25c8f25c5548add1d45"
 
-
 class SampledSound(OrbaPresetElementBaseClass):
-    sample_index: int
+    sampleIndex: int
     name: str
-    loop_start: int
-    loop_end: int
+    loopStart: int
+    loopEnd: int
     pitch: str
-    file_name: str
+    fileName: str
     subdirectory: Subdirectory
     pool: Pool
  
 class SampleSet(OrbaPresetElementBaseClass):
     sampled_sound: List[SampledSound]
     name: str
-    note_thresholds: str
-    velocity_thresholds: str
-    sample_map: str
+    noteThresholds: str
+    velocityThresholds: str
+    sampleMap: str
  
 class SynthPatchCompatibility(OrbaPresetElementBaseClass):
-    audio_engine_major: int
-    audio_engine_minor: int
-    sample_playback: int
+    audioEngineMajor: int
+    audioEngineMinor: int
+    samplePlayback: int
 
 class SynthPatch(OrbaPresetElementBaseClass):
-    compatibility: SynthPatchCompatibility
-    synth_mode: int
-    octave: int
-    osc1_multiplier: int
-    osc1_detune: int
-    osc1_mix: int
-    osc2_multiplier: int
-    osc2_detune: int
-    osc2_mix: int
-    ring_mod: int
-    noise_mix: int
-    osc1_vibrato: int
-    osc2_vibrato: int
-    osc1_ramp1_start: int
-    osc1_ramp1_end: int
-    osc1_ramp1_time: int
-    osc1_ramp2_start: int
-    osc1_ramp2_end: int
-    osc1_ramp2_time: int
-    osc1_ramp3_start: int
-    osc1_ramp3_end: int
-    osc1_ramp3_time: int
-    osc2_ramp1_start: int
-    osc2_ramp1_end: int
-    osc2_ramp1_time: int
-    osc2_ramp2_start: int
-    osc2_ramp2_end: int
-    osc2_ramp2_time: int
-    osc2_ramp3_start: int
-    osc2_ramp3_end: int
-    osc2_ramp3_time: int
-    amp_env_attack: int
-    amp_env_peak_velocity: int
-    amp_env_decay: int
-    amp_env_sustain: int
-    amp_env_sustain_velocity: int
-    amp_env_release: int
-    amp_env_release_velocity: int
-    filter_env_attack: int
-    filter_env_peak_velocity: int
-    filter_env_decay: int
-    filter_env_sustain: int
-    filter_env_sustain_velocity: int
-    filter_env_release: int
-    filter_env_release_velocity: int
-    vca2_env_attack: int
-    vca2_env_peak_velocity: int
-    vca2_env_decay: int
-    vca2_env_sustain: int
-    vca2_env_sustain_velocity: int
-    vca2_env_release: int
-    vca2_env_release_velocity: int
-    env_select: int
-    wg_mode: int
-    wg_pitch: int
-    wg_regeneration: int
-    wg_damp_on_hold: int
-    wg_damp_on_release: int
-    wg_mix_back: int
-    wg_mix_forward: int
-    wg_lfo_mod: int
-    filter_mode: int
-    filter_cutoff: int
-    filter_cutoff_key: int
-    filter_cutoff_env: int
-    filter_resonance: int
-    filter_resonance_env: int
-    lfo_rate: int
-    lfo_mode: int
-    output_level: int
-    reverb_level: int
-    delay_level: int
-    effect_select: int
-    effect_depth: int
-    effect_param1: int
-    effect_param2: int
-    mod_source1_1_destination: int
-    mod_source1_1_weight: int
-    mod_source1_2_destination: int
-    mod_source1_2_weight: int
-    mod_source1_3_destination: int
-    mod_source1_3_weight: int
-    mod_source2_1_destination: int
-    mod_source2_1_weight: int
-    mod_source2_2_destination: int
-    mod_source2_2_weight: int
-    mod_source2_3_destination: int
-    mod_source2_3_weight: int
-    mod_source3_1_destination: int
-    mod_source3_1_weight: int
-    mod_source3_2_destination: int
-    mod_source3_2_weight: int
-    mod_source3_3_destination: int
-    mod_source3_3_weight: int
-    mod_source4_1_destination: int
-    mod_source4_1_weight: int
-    mod_source4_2_destination: int
-    mod_source4_2_weight: int
-    mod_source4_3_destination: int
-    mod_source4_3_weight: int
+    synthMode: int  
+    octave: int 
+    osc1Multiplier: int 
+    osc1Detune: int 
+    osc1Mix: int 
+    osc2Multiplier: int 
+    osc2Detune: int 
+    osc2Mix: int 
+    ringMod: int 
+    noiseMix: int 
+    osc1Vibrato: int 
+    osc2Vibrato: int 
+    osc1Ramp1Start: int 
+    osc1Ramp1End: int 
+    osc1Ramp1Time: int 
+    osc1Ramp2Start: int 
+    osc1Ramp2End: int 
+    osc1Ramp2Time: int 
+    osc1Ramp3Start: int 
+    osc1Ramp3End: int 
+    osc1Ramp3Time: int 
+    osc2Ramp1Start: int 
+    osc2Ramp1End: int 
+    osc2Ramp1Time: int 
+    osc2Ramp2Start: int 
+    osc2Ramp2End: int 
+    osc2Ramp2Time: int 
+    osc2Ramp3Start: int 
+    osc2Ramp3End: int 
+    osc2Ramp3Time: int 
+    ampEnvAttack: int 
+    ampEnvPeakVelocity: int 
+    ampEnvDecay: int 
+    ampEnvSustain: int 
+    ampEnvSustainVelocity: int 
+    ampEnvRelease: int 
+    ampEnvReleaseVelocity: int 
+    filterEnvAttack: int 
+    filterEnvPeakVelocity: int 
+    filterEnvDecay: int 
+    filterEnvSustain: int 
+    filterEnvSustainVelocity: int 
+    filterEnvRelease: int 
+    filterEnvReleaseVelocity: int 
+    vca2EnvAttack: int 
+    vca2EnvPeakVelocity: int 
+    vca2EnvDecay: int 
+    vca2EnvSustain: int 
+    vca2EnvSustainVelocity: int 
+    vca2EnvRelease: int 
+    vca2EnvReleaseVelocity: int 
+    envSelect: int 
+    wgMode: int 
+    wgPitch: int 
+    wgRegeneration: int 
+    wgDampOnHold: int 
+    wgDampOnRelease: int 
+    wgMixBack: int 
+    wgMixForward: int 
+    wgLFOMod: int 
+    filterMode: int 
+    filterCutoff: int 
+    filterCutoffKey: int 
+    filterCutoffEnv: int 
+    filterResonance: int 
+    filterResonanceEnv: int 
+    lfoRate: int 
+    lfoMode: int 
+    outputLevel: int 
+    reverbLevel: int 
+    delayLevel: int 
+    effectSelect: int 
+    effectDepth: int 
+    effectParam1: int 
+    effectParam2: int 
+    modSource1_1Destination: int 
+    modSource1_1Weight: int 
+    modSource1_2Destination: int 
+    modSource1_2Weight: int 
+    modSource1_3Destination: int 
+    modSource1_3Weight: int 
+    modSource2_1Destination: int 
+    modSource2_1Weight: int 
+    modSource2_2Destination: int 
+    modSource2_2Weight: int 
+    modSource2_3Destination: int 
+    modSource2_3Weight: int 
+    modSource3_1Destination: int 
+    modSource3_1Weight: int 
+    modSource3_2Destination: int 
+    modSource3_2Weight: int 
+    modSource3_3Destination: int 
+    modSource3_3Weight: int 
+    modSource4_1Destination: int 
+    modSource4_1Weight: int 
+    modSource4_2Destination: int 
+    modSource4_2Weight: int 
+    modSource4_3Destination: int 
+    modSource4_3Weight: int 
     mode: str
  
 
@@ -364,13 +484,13 @@ class TuningEntry(OrbaPresetElementBaseClass):
     key: str
     name: str
     intervals: str
-    midi_octave: int
-    transposition_type: str
+    midiOctave: int
+    transpositionType: str
     type: str
     tuning: str
  
 class CoverArt(OrbaPresetElementBaseClass):
-    cover_image_ref: str
+    coverImageRef: str
     artist: str
  
 class Visuals(OrbaPresetElementBaseClass):
@@ -396,9 +516,9 @@ class PresetEntry(OrbaPresetElementBaseClass):
     # attributes
     name: str
     description: str
-    tag_list: str 
+    tagList: str 
     uuid: str
-    read_only: int
+    readOnly: int
     mode: str
     artist: str
     factory: int
