@@ -7,11 +7,13 @@ import glob
 from lxml import etree
 from xmldiff import main, formatting
 import os
-
+from os.path import exists
 
 # VSCode uses root folder of the project as a context to run the script, and it fails without changing folder  manually
-os.chdir("standalone") 
- 
+if not exists("OrbaPreset/OrbaPreset.py"):
+    os.chdir("standalone") 
+
+    
 # just to show some object manipulations 
 
 orba_preset =  OrbaPreset.PresetEntry()

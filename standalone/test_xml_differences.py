@@ -7,10 +7,11 @@ import glob
 from lxml import etree
 from xmldiff import main, formatting
 import os
-
+from os.path import exists
 # this script is used to check if 
 # 1) artipreset xml files would be LOGICALLY identical to original, after parsing it with OrbaPreset library and unparsed back
 # 2) parsing/unparsing will cause an expection.
+# 3) if there are any missing annotations in class property hints
 
 
 # testing difference manually:
@@ -18,9 +19,8 @@ import os
 
 
 # vs code uses root folder of the project for runtime :*
-os.chdir("standalone") 
-print(os. getcwd() )
-print("lets go")
+if not exists("OrbaPreset/OrbaPreset.py"):
+    os.chdir("standalone") 
 
 
 # we are expecting artipreset folder to contain  Lead,Bass,Chord, Drum folders with artipreset files from Orba.
@@ -28,7 +28,7 @@ file_list = glob.glob('artipreset/*/*.artipreset')
  
 
 for i in file_list:
-
+   # print(f"{i}")
     orba_preset =  OrbaPreset.PresetEntry()
     try:
         orba_preset.load_from_file(i)

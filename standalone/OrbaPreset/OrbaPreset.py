@@ -62,6 +62,11 @@ class OrbaPresetElementBaseClass:
                 logging.debug( f"setting {self.__class__.__name__} attribute {xml_part_name}=\'{aux_data[attribute_name]}\'")
 
                 # properties defined in class definition are note strict, more like used for autocomplete
+                # verify if class has annotation for that. If not, we add value to property anyway, but 
+                # would be nice to know that annotations are outdated.
+                if not python_object_attribute_name  in self.__class__.__annotations__:
+                    logging.warn(f"(a) attribute {python_object_attribute_name} is not mentioned in {self.__class__.__name__}. Adding it anyway.  (class description is not full)")
+
                 setattr(self, python_object_attribute_name, aux_data[attribute_name])    
 
         # it is just text, never seen it in orba2 preset, ignore it
@@ -76,6 +81,10 @@ class OrbaPresetElementBaseClass:
          
                 element_name = xml_part_name                               # as in xml,   eg SampleSound
                 python_object_element_name = camel_to_snake(element_name)  # as in class,  eg sample_sound
+
+                # verify if class has annotation for that. If not, we add value to property anyway, but 
+                # would be nice to know that annotations are outdated.
+               
 
                 # let's see if python class with the same name as element exists
                 if element_name in sorted(globals()):
@@ -98,6 +107,10 @@ class OrbaPresetElementBaseClass:
 
                     element = eval( f" {python_class_name} ( {aux_data[element_name]} )")  
                     # add new object to this object as a property
+
+                    if not python_object_element_name  in self.__class__.__annotations__:
+                        logging.warn(f"(e) attribute {python_object_element_name} is not mentioned in {self.__class__.__name__}. Adding it anyway.  (class description is not full)")
+
                     setattr(self, python_object_element_name,  element)
 
                 # list, like SampleSound. Instead of one object, we need to generate a list of objects
@@ -113,6 +126,13 @@ class OrbaPresetElementBaseClass:
                         logging.debug(  f"processing item {counter} of {python_class_name}")
                         sub_element = eval( f"{python_class_name}({sub_element_data})")
                         element.append(sub_element)
+
+                    
+                    # verify if class has annotation for that. If not, we add value to property anyway, but 
+                    # would be nice to know that annotations are outdated.
+                    if not python_object_element_name  in self.__class__.__annotations__:
+                        logging.warn(f"(l) attribute {python_object_element_name} is not mentioned in {self.__class__.__name__}. Adding it anyway.  (class description is not full)")
+
                     setattr(self, python_object_element_name,  element)
 
     # generate dict from the object, that is suitable for xmltodict.unparse xml generation   https://github.com/martinblech/xmltodict
@@ -194,7 +214,7 @@ class ModifierChainCompatibility(OrbaPresetElementBaseClass):
 
 class SeekerListCompatibility(OrbaPresetElementBaseClass):
     majorVersion: int
-    majorVersion: int
+    minorVersion: int
 
 
 class ChordModifierParams(OrbaPresetElementBaseClass):
@@ -202,7 +222,7 @@ class ChordModifierParams(OrbaPresetElementBaseClass):
     minorChordList: str
 
 
-class ModifierEntry(OrbaPresetElementBaseClass):
+class ModifierChainModifierEntry(OrbaPresetElementBaseClass):
     chord_modifier_params: ChordModifierParams
     chainIndex: int
     prioIndex: int
@@ -211,11 +231,14 @@ class ModifierEntry(OrbaPresetElementBaseClass):
     eventsInSource: str
     eventsInLength: str
     eventsOutCurve: int
+    eventsInGain: int
+    eventsOutLength: int
+
 
 
 class ModifierChain(OrbaPresetElementBaseClass):
     compatibility: ModifierChainCompatibility
-    modifier_entry: ModifierEntry  # appeared in chords
+    modifier_entry: ModifierChainModifierEntry  # appeared in chords
     chainIndex: int
 
 
@@ -267,6 +290,8 @@ class CymbalPatch(OrbaPresetElementBaseClass):  # only  drum stuff
     pan: int
     fx: int
     index: int
+    midiNote: int
+    priority: int
 
 
 class DrumPatch(OrbaPresetElementBaseClass):  # only  drum stuff
@@ -295,6 +320,8 @@ class DrumPatch(OrbaPresetElementBaseClass):  # only  drum stuff
     fx: int
     note: int
     index: int
+    midiNote: int
+    priority: int
 
 
 class ShakerPatch(OrbaPresetElementBaseClass):  # only  drum stuff
@@ -308,6 +335,9 @@ class ShakerPatch(OrbaPresetElementBaseClass):  # only  drum stuff
     level: int
     pan: int
     fx: int
+    index: int
+    midiNote: int
+    priority: int
 
 
 class SampleDrumPatch(OrbaPresetElementBaseClass):  # only drum stuff
@@ -345,6 +375,7 @@ class SampleDrumPatch(OrbaPresetElementBaseClass):  # only drum stuff
 
 
 class KitPatchCompatibility(OrbaPresetElementBaseClass):  # only drum stuff
+    
     audioEngineMajor: int
     audioEngineMinor: int
     samplePlayback: int
@@ -355,6 +386,9 @@ class KitPatchCompatibility(OrbaPresetElementBaseClass):  # only drum stuff
 
 
 class KitPatch(OrbaPresetElementBaseClass):  # only  drum stuff
+    
+    sample_drum_patch: SampleDrumPatch
+    compatibility: KitPatchCompatibility
     drum_patch: List[DrumPatch]
     cymbal_patch: List[CymbalPatch]
     shaker_patch: ShakerPatch
@@ -394,6 +428,7 @@ class SynthPatchCompatibility(OrbaPresetElementBaseClass):
 
 
 class SynthPatch(OrbaPresetElementBaseClass):
+    compatibility:  SynthPatchCompatibility
     synthMode: int
     octave: int
     osc1Multiplier: int
@@ -495,8 +530,13 @@ class SynthPatch(OrbaPresetElementBaseClass):
     modSource4_3Weight: int
     mode: str
 
+class  SoundPresetCompatibility:
+    pass
+
 
 class SoundPreset(OrbaPresetElementBaseClass):
+    kit_patch: KitPatch
+    compatibility:  SoundPresetCompatibility
     synth_patch: SynthPatch
     sample_set: SampleSet
     name: str
@@ -522,6 +562,23 @@ class Visuals(OrbaPresetElementBaseClass):
     # subclasses
     cover_art: CoverArt
 
+class PresetEntryModifierListModifierEntry(OrbaPresetElementBaseClass):
+
+    # subclasses
+    chainIndex: int
+    prioIndex: int
+    modifierData: str
+    modifierUuid: str
+    gestureUuid: str
+    uuid: str
+
+
+
+
+class PresetEntryModifierList(OrbaPresetElementBaseClass):
+    
+   modifier_entry: List[PresetEntryModifierListModifierEntry]
+  
 
 class PresetEntry(OrbaPresetElementBaseClass):
 
@@ -547,6 +604,9 @@ class PresetEntry(OrbaPresetElementBaseClass):
     mode: str
     artist: str
     factory: int
+
+    permanentDescription: str
+    stemArtist: str
 
     # auxilary
     aux_data: dict
