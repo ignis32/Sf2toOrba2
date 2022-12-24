@@ -145,12 +145,19 @@ class OrbaPresetElementBaseClass:
         # use current object properties provided by __dict__ 
         for i in self.__dict__.keys():
 
+
+            # skip if auxilary data (the one that is not rquried for xml
+            if i.startswith("aux_"):
+                data.pop(i)
+                logging.debug(f"skipping {i} as aux")
+                continue
+
             # trying to distingush elements, elements list and attributes 
 
             # attribute.
-            if type(data[i]) == str or type(data[i]) == int:
+            if type(data[i]) == str or type(data[i]) == int or type(data[i]) == float:
                 # seems like xmltodict has some issue with this symbol )en dash)
-                attribute_value = data.pop(i).replace(r"–", "-")
+                attribute_value = str(data.pop(i)).replace(r"–", "-")
                 # just rename according to xmltodict convention, by removing old element and adding new
                 data[f"@{(i)}"] = attribute_value
 
@@ -171,8 +178,7 @@ class OrbaPresetElementBaseClass:
                 data[f"{to_pascal_case(i)}"] = getattr( self,  i).get_as_dict()    # same as above but just for one standalone element
         
             else:
-                raise(
-                    f"Do not know what to do with {data[i]}  {type(data[i])}")
+                raise ValueError(f"Do not know what to do with {data[i]}  {type(data[i])}")
 
         return data
 
@@ -398,8 +404,8 @@ class Pool(OrbaPresetElementBaseClass):
     USER = "User"
 
 
-class Subdirectory(OrbaPresetElementBaseClass):
-    PAN_DRUM_82301_E0_F951_DB25_C8_F25_C5548_ADD1_D45 = "PanDrum_82301e0f951db25c8f25c5548add1d45"
+#class Subdirectory(OrbaPresetElementBaseClass):
+#    PAN_DRUM_82301_E0_F951_DB25_C8_F25_C5548_ADD1_D45 = "PanDrum_82301e0f951db25c8f25c5548add1d45"
 
 
 class SampledSound(OrbaPresetElementBaseClass):
@@ -409,7 +415,7 @@ class SampledSound(OrbaPresetElementBaseClass):
     loopEnd: int
     pitch: str
     fileName: str
-    subdirectory: Subdirectory
+    subdirectory: str
     pool: Pool
 
 

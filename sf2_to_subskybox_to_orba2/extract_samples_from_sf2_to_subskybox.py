@@ -103,8 +103,8 @@ with open(filepath, 'rb') as sf2_file:
                 'key_range_top':      bag.key_range[-1] if bag.key_range != None else 127 ,   #  was planned to use with Orba note threshold, but seems like orba does not allow to set range.
                 'velocity_range':     bag.velocity_range,  
                 'velocity_range_top': bag.velocity_range[-1] if bag.velocity_range != None else 127,  # used for Orba2 velocity threshold
-                'root_note':                         bag.base_note if bag.base_note != None  else (bag.sample.DEFAULT_PITCH) ,  # used to assign sample to note. base_note (root note override) might be absent, in this case default sample's pitch kicks in.
-                'root_note_text':     number_to_note(bag.base_note if bag.base_note != None  else (bag.sample.DEFAULT_PITCH)),  # used to name a sample file 
+                'root_note':                         bag.base_note if bag.base_note != None  else (bag.sample.original_pitch) ,  # used to assign sample to note. base_note (root note override) might be absent, in this case default sample's pitch kicks in.
+                'root_note_text':     number_to_note(bag.base_note if bag.base_note != None  else (bag.sample.original_pitch)),  # used to name a sample file 
                 'loop_enabled': bag.sample_loop,
                 'loop_enabled_on_noteoff': bag.sample_loop_on_noteoff,
                 'loop_start_offset':  bag.cooked_loop_start if bag.sample_loop !=None else 0, # when note is played for long, it goes to the loop. This loop is a part of initial sample.
