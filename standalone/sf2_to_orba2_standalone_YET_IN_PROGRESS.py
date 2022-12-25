@@ -19,6 +19,7 @@ import tempfile
 import pydub
 from pydub import AudioSegment
 import math
+from gtts import gTTS 
 # There is no strict assignment of the note 60 to certain octave. 
 # https://petervodden.blog/portfolio/middle-c-c3-or-c4/
 # note 60 can be C3 or C4 or even sometimes C5 depending on interpretation.
@@ -29,6 +30,8 @@ import logging
 logging.disable(logging.WARNING)
 
 
+#
+replace_samples_with_speech=False
 # Most popular
 MIDDLE_C_IS_C5 =  0
 MIDDLE_C_IS_C4 = -1   
@@ -48,8 +51,8 @@ sf2_folder_path='test_sf2'
 #sf2_filename = r'ACCORDION.sf2'
 #sf2_filename = r'Hang-D-minor-20220330.sf2'
 #sf2_filename = r'314-Good_Rocky_Drum.sf2'
-sf2_filename = r'Marimbala.sf2'
-
+#sf2_filename = r'Marimbala.sf2'
+sf2_filename = r'ConcertHarp-20200702.sf2'
 
 
 
@@ -106,7 +109,11 @@ def note_to_pitch(midi_note, fine_tuning_cents = 0 , coarse_tuning_semitones = 0
     else:
         pitch = sample_rate_pitch_correction * -1  # this means pitch is static and not transposed by orba depending on note. Only sample rate correction.
         print (f"static pitch {pitch}")
-    return  pitch
+
+
+    if replace_samples_with_speech==True:
+        return -2
+    return  round(pitch,6)
                           #
 def note_to_pitch_old(midi_note, fine_tuning_cents = 0 , coarse_tuning_semitones = 0, sample_rate = 48000, midi_key_pitch_influence = 0):
   
@@ -216,6 +223,7 @@ def parse_instrument_samples(instrument: Sf2Instrument ):
                 '@aux_velocity_range':  bag.velocity_range,
                 '@aux_velocity_range_top': bag.velocity_range[-1] if bag.velocity_range != None and bag.velocity_range != False else 127,
 
+                '@aux_root_note': root_note,
                 '@aux_instrument_name' : instrument_name,
                 '@aux_TMP_WAV_FILE': tmp_wav_file,
                 '@aux_pan': bag.pan        
@@ -406,6 +414,27 @@ def generateSampleSetMetadata(mixed_sampled_sounds):
     else:
         raise ValueError("Something is wrong with thresholds and sample mapping")
 
+    print("------------------------")
+    sample_counter=0
+    note_thresholds_counter=0
+    for i in velocity_thresholds_list:
+     try:
+
+        print (i)
+
+         
+        print (f"   {mixed_sampled_sounds[sample_counter].aux_root_note}   {mixed_sampled_sounds[sample_counter].name}  {note_thresholds_list[note_thresholds_counter]}"  )
+        sample_counter+=1
+
+        for ii in i:
+                print (f"   {mixed_sampled_sounds[sample_counter].aux_root_note}   {mixed_sampled_sounds[sample_counter].name}  {note_thresholds_list[note_thresholds_counter]}"  )
+                sample_counter+=1
+    
+        note_thresholds_counter +=1
+     except:
+        pass
+    print("------------------------")
+
     return note_thresholds, sample_mappings, velocity_thresholds
 
 
@@ -478,8 +507,19 @@ with open(sf2_filepath, 'rb') as sf2_file:
         
         for s in preset.sound_preset.sample_set.sampled_sound:
                         # temporary file                    #how it should be named 
-            shutil.copy2(s.aux_TMP_WAV_FILE.name , f"{sample_folder_path}/{s.fileName}")
-
+           
+            if not replace_samples_with_speech:
+                shutil.copy2(s.aux_TMP_WAV_FILE.name , f"{sample_folder_path}/{s.fileName}")
+            else:
+                 
+                language = 'ru'
+                print (f"getting text to speech for {s.name}")
+                tts = gTTS(text=s.name, lang=language, slow=False) 
+                temp_mp3 = create_temp_wav_file("mp3")                 
+                tts.save(temp_mp3.name+".mp3")
+                sound = AudioSegment.from_mp3( temp_mp3.name+".mp3" )
+                sound.export(f"{sample_folder_path}/{s.fileName}", format="wav")
+              
 
 
         #export artipreset   
@@ -500,106 +540,7 @@ with open(sf2_filepath, 'rb') as sf2_file:
          
         
         
-  
-        
-
- 
-
-
-
-
-                #mixed_sample_sound = group_list[0]   #will mix everythin into first element
-                #mixed_sample_sound.fileName =  "MIX_"+ base_sample_sound.fileName
-                #mixed_wav = AudioSegment.empty()
-
-
-                #determine longest sample (overlay function trims everything)
-                 
-                
-                
-                
-                    #print(f" {key} {s.sampleIndex}: {s.name} {s.aux_key_range} {s.aux_velocity_range} {s.aux_pan} ")
-
-                    #wav = AudioSegment.from_wav("output/MEDSNR3T-L.wav").set_channels(2).pan(s.aux_pan)
-                    
-
- 
- 
- 
-
-                    #aaa = AudioSegment.from_wav(s.aux_TMP_WAV_FILE.name)
-                    #aaa.export(f"output/{s.name}.pydub.wav",format="wav")
-                    #shutil.copy2(s.aux_TMP_WAV_FILE.name , f"output/{s.name}.wav")
-                     
-                     
-
-        # reindex samples according to their new sequence
-
-
-
-        # for key, group in itertools.groupby(sorted_sample_sounds, key = sort_by_key_and_velocity):
-            
-        #     if not str(key) in note_th_list:
-        #         note_th_list.append(str(key))
-        #     print(f"{key}:-----------------------------") 
-        #     for s in group:
-        #        # print(f"{key}:") 
-        #         print(f"  {s.sampleIndex}: {s.name} {s.aux_key_range} {s.aux_velocity_range}  ")
-
-        # print( ",".join(note_th_list))
-
-       # for i in sample_sounds:
-        #    print (i.name)
-
-             
-        #for  sp in preset.sound_preset.sample_set.sampled_sound:
-        #    print (sp.aux_key_range_top)
-        #grouped_by_notes = [list(g) for _, g in groupby(sorted_sample_sets, attrgetter('midi_note'))]
-
-
-     #-------------   
-        # sample_folder_path=f"{target_dir}/{instrument_metadata['instrument_name']}/Common/SamplePools/User/{instrument_metadata['instrument_name']}"
-        # ensure_folder(sample_folder_path)
-
-        # preset.sound_preset.sample_set.sampled_sound  = []   # remove existing records
-
-
-       # for sampled_sound_data_plus_aux in parsed_instrument_samples:
-
-         
-        #    sampled_sound = OrbaPreset.SampledSound(sampled_sound_data_plus_aux)    
-        #    sample_file_path=f"{sample_folder_path}/{sampled_sound.fileName}"
-        #    print(f"exporting to {sample_file_path}" )
-        #    sampled_sound.aux_SAMPLE.export(sample_file_path)
-
-        #    preset.sound_preset.sample_set.sampled_sound.append(sampled_sound)
-        
-        #    # export new artipreset
-        #    preset_folder_path=f"{target_dir}/{instrument_metadata['instrument_name']}/Common/Presets/Lead"          
-        #    preset_file_name=f"{instrument_metadata ['instrument_name']}_{instrument_metadata ['instrument_uuid']}.artipreset"
-        #    preset_file_path=f"{preset_folder_path}/{preset_file_name}"
-
-        #ensure_folder(preset_folder_path)
-
-        #preset.export_as_xml(preset_file_path)
-           
-          
-
-
-# The BYTE byOriginalPitch contains the MIDI key number of the recorded pitch of the sample. For example, a recording of
-# an instrument playing middle C (261.62 Hz) should receive a value of 60. This value is used as the default “root key” for
-# the sample, so that in the example, a MIDI key-on command for note number 60 would reproduce the sound at its original
-# pitch. For unpitched sounds, a conventional value of 255 should be used. Values between 128 and 254 are illegal.
-# Whenever an illegal value or a value of 255 is encountered, the value 60 should be used. 
-
-# 58 overridingRootKey This parameter represents the MIDI key number at which the sample is to be played
-# back at its original sample rate. If not present, or if present with a value of -1, then
-# the sample header parameter Original Key is used in its place. If it is present in the
-# range 0-127, then the indicated key number will cause the sample to be played back
-# at its sample header Sample Rate. For example, if the sample were a recording of a
-# piano middle C (Original Key = 60) at a sample rate of 22.050 kHz, and Root Key
-# were set to 69, then playing MIDI key number 69 (A above middle C) would cause a
-#piano note of pitch middle C to be heard. 
+   
 
 
 for i in temp_files_to_remove:

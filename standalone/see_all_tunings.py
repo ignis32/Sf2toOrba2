@@ -23,11 +23,16 @@ for i in file_list:
     try:
         
 
-        print (orba_preset.tuning_entry.tuning)
-        print (orba_preset.tuning_entry.midiOctave)
-        # print ( f"{orba_preset.sound_preset.sample_set.noteThresholds}  {len( orba_preset.sound_preset.sample_set.noteThresholds.split(',') )}")
+      #  print (orba_preset.tuning_entry.tuning)
+      #  print (orba_preset.tuning_entry.midiOctave)
+
+      #for i in  orba_preset.sound_preset.sample_set.sampled_sound:
+       # print (i.pitch)
+        #print ( f"{orba_preset.sound_preset.sample_set.noteThresholds}  {len( orba_preset.sound_preset.sample_set.noteThresholds.split(',') )}")
         # print (".")
-        # print ( orba_preset.sound_preset.sample_set.velocityThresholds)
+        #print ( orba_preset.sound_preset.sample_set.velocityThresholds)
+
+        print (len (orba_preset.sound_preset.sample_set.sampled_sound))
         # print (".")
         # print ( orba_preset.sound_preset.sample_set.sampleMap)
         # print (".")

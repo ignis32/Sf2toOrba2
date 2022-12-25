@@ -9,3 +9,4 @@ __pycache__
 *.xml
 test_sf2
 output
+*.exe
