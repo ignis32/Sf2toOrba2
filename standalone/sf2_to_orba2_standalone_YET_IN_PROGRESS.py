@@ -53,8 +53,8 @@ sf2_folder_path='test_sf2'
 #sf2_filename = r'314-Good_Rocky_Drum.sf2'
 #sf2_filename = r'Marimbala.sf2'
 sf2_filename = r'ConcertHarp-20200702.sf2'
-
-
+#sf2_filename = r'JawHarp-20200606.sf2'
+#sf2_filename = r'SynthSquare-20200512.sf2'
 
 target_dir = r'output'
 
@@ -396,18 +396,57 @@ def generateSampleSetMetadata(mixed_sampled_sounds):
         velocity_thresholds_list.append(group_velocity_threshold)
 
 
-
     note_thresholds_list.pop() # note threshold always has one less element than mappings. (last one is ommited)
 
-    note_thresholds=",".join(note_thresholds_list) # convert to single string
-    sample_mappings  = str(sample_mappings_list)[1:-1].replace(" ", "")
-    velocity_thresholds =  str(velocity_thresholds_list)[1:-1].replace(" ", "")
 
+    # Here goes a ugly workround for orba2 bug, that starts doing strange stuff when
+    # amount of samples in different groups is not the same.    (if group has less samples then group previous group - it will play wrong sample index 0)
     
+    max_group_size_mappings=0
+    for i in sample_mappings_list:
+        max_group_size_mappings=max(max_group_size_mappings, len(i))
+
+    max_group_size_velocity=0
+    for i in velocity_thresholds_list:
+        max_group_size_velocity=max(max_group_size_velocity, len(i))
+    
+    if not max_group_size_mappings == max_group_size_velocity+1:
+        raise ValueError ("velocity threshold does not meet  sample mappings. Calculations failed.")
+ 
+   
+    print(f"max group size:  samples mapping {max_group_size_mappings}  velocity mapping {max_group_size_velocity}")
+
+
+    # fixing sample_mappings list
+    for _ in range(1,100):
+        for i in sample_mappings_list:
+            if len(i) < max_group_size_mappings:
+                print (f"fixing {i} by duplicating last sample id {i[-1]}")
+                i.append(i[-1])
+    print(f"fixed sample_mappings_list: {sample_mappings_list} ")
+
+    for _ in range(1,100):
+        for i in velocity_thresholds_list:
+            if len(i) < max_group_size_velocity:
+                print (f"fixing {i} by duplicating last velocity +1")
+                if len(i) > 0:
+                    i.append(i[-1]+1)
+                else:
+                    i.append(90)
+    print(f"fixed velocity_thresholds: {velocity_thresholds_list} ")
+            
+    
+
+    note_thresholds=",".join(note_thresholds_list) # convert to single string
+    sample_mappings  = str(sample_mappings_list)[1:-1].replace(" ", "").replace( ("],["), "][")
+    velocity_thresholds =  str(velocity_thresholds_list)[1:-1].replace(" ", "").replace( ("],["), "][")
+
 
     print (f"note_thresholds:   {note_thresholds}    len:  { len(note_thresholds_list) }" )
     print (f"sample_mappings:   {sample_mappings}    len:  { len(sample_mappings_list) }" )
     print (f"velocity_thresholds: {velocity_thresholds}  len:  { len(velocity_thresholds_list) }" )
+
+   
 
     if (len(note_thresholds_list) +1 )  ==  len(sample_mappings_list) == len(velocity_thresholds_list) :
         print("sanity check pass")
