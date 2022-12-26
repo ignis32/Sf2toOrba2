@@ -52,12 +52,14 @@ sf2_folder_path='test_sf2'
 #sf2_filename = r'Hang-D-minor-20220330.sf2'
 #sf2_filename = r'314-Good_Rocky_Drum.sf2'
 #sf2_filename = r'Marimbala.sf2'
-sf2_filename = r'ConcertHarp-20200702.sf2'
+#sf2_filename = r'ConcertHarp-20200702.sf2'
 #sf2_filename = r'JawHarp-20200606.sf2'
 #sf2_filename = r'SynthSquare-20200512.sf2'
-
+sf2_filename = r'just t4.sf2'
 target_dir = r'output'
 
+
+search_for_instrument="choir"
 
 
 sf2_filepath = f"{sf2_folder_path}/{sf2_filename}"
@@ -144,12 +146,15 @@ def create_temp_wav_file(name):
  
 
 
-def parse_instrument_samples(instrument: Sf2Instrument ):
+def parse_instrument_samples(instrument: Sf2Instrument, preset: OrbaPreset.PresetEntry):
     
     if  instrument.name  == "EOI":  # this is not a real instrument, "EOI" indicating end of instruments.
         return  []   
-        
-    print (f"Instrument: { instrument.name} #{instrument.bag_size}     {instrument.bag_idx}")
+
+
+
+
+    print (f"Instrument: { preset.name} #{instrument.bag_size}     {instrument.bag_idx}")
     
     # bag - A SoundFont data structure element containing a list of preset zones or instrument zones
     # instrument zone - A subset of an instrument containing a sample reference and associated articulation data defined to play over certain key numbers and velocities.
@@ -166,7 +171,7 @@ def parse_instrument_samples(instrument: Sf2Instrument ):
             continue
          
         allowed_pattern=r'[^-a-zA-Z0-9_#()]+' 
-        instrument_name = "SF2_"+slugify.slugify(instrument.name, regex_pattern=allowed_pattern, lowercase=False)  # this name is used as a folder name, it should be valid for filesystem
+        instrument_name = "SF2_"+slugify.slugify(preset.name, regex_pattern=allowed_pattern, lowercase=False)  # this name is used as a folder name, it should be valid for filesystem
         
         if bag.sample.pitch_correction !=0:
             print(f"pitch correction found for sample {bag.sample.name}:  {bag.sample.pitch_correction}") 
@@ -247,11 +252,11 @@ def parse_instrument_metadata(instrument):
 
 
 
-def add_image_to_preset(instrument_metadata):
+def add_image_to_preset(instrument_metadata,preset):
 
         ## create some  stub png image
-        image_folder_path=f"{target_dir}/{instrument_metadata['instrument_name']}/Common/Images"
-        image_filename=f"{  instrument_metadata['instrument_name'] }_{ md5sum( instrument_metadata['instrument_name'] + 'image' )  }.png"
+        image_folder_path=f"{target_dir}/{ preset.name}/Common/Images"
+        image_filename=f"{  preset.name }_{ md5sum(  preset.name + 'image' )  }.png"
         image_file_path= f"{image_folder_path}/{image_filename}"     
         ensure_folder(image_folder_path)
         shutil.copyfile("sf2toorba.png", image_file_path)
@@ -266,19 +271,19 @@ def generate_OrbaPreset(instrument_metadata):
         preset.readOnly=0  #!!! vital to be able to remove custom preset later properly.
         preset.uuid = instrument_metadata ['instrument_uuid']
         template_name = preset.name
-        preset.name = instrument_metadata['instrument_name']
-        preset.sound_preset.name =  instrument_metadata['instrument_name']
-        preset.sound_preset.sample_set.name = instrument_metadata['instrument_name']
+        preset.name = f"{instrument_metadata['instrument_name']}_{preset.mode}"
+        preset.sound_preset.name =   preset.name
+        preset.sound_preset.sample_set.name =  preset.name
         preset.description = f"Generated with Sf2toOrba2 from SF2 [{sf2_filename}] using artipreset template [{preset.mode}] [{template_name}]"
         preset.tagList = "#sf2 #converted"
         preset.artist = "SF2toOrba2"
         preset.visuals.cover_art.artist = "SF2toOrba2"
-        preset.visuals.cover_art.coverImageRef = image_filename
+        preset.visuals.cover_art.coverImageRef = "stub"
         return preset
 
 
-def generate_SampledSounds(instrument):
-        parsed_instrument_samples  = parse_instrument_samples(instrument)     
+def generate_SampledSounds(instrument, preset):
+        parsed_instrument_samples  = parse_instrument_samples(instrument,preset)     
         sampled_sounds = []
         
         for sampled_sound_data_plus_aux in parsed_instrument_samples:
@@ -492,28 +497,30 @@ with open(sf2_filepath, 'rb') as sf2_file:
     print ("----------------------------------------------------------------")
     
     for instrument in sf2.instruments:
-        
         instrument_metadata = parse_instrument_metadata(instrument)
-        
-
-#### TEMPORARY
-       # if instrument_metadata['instrument_name'] != 'SF2_CHURCH-ORGAN':
-        if instrument_metadata['instrument_name'] in ['SF2_VIBRAPHONE','SF2_CELLO', 'SF2_Accordian'] :  ## excluding instruments with pitch corrected samples.
+       
+        if  search_for_instrument  in instrument_metadata['instrument_name']  or  search_for_instrument== "":
+            pass
+        else:
             continue
-#### TEMPORARY
+
 
         #skip "fake"  sf2 instrument
         if instrument_metadata['instrument_name'] == 'SF2_EOI':
             continue
         
-        # create stub png picture
-        image_filename=add_image_to_preset(instrument_metadata)
+        
 
         # load template artipreset and override some fields  with data from sf2 instrument
         preset = generate_OrbaPreset(instrument_metadata)
 
         ##   generate list of samples as SampledSound objects and fill them with metadata.
-        sampled_sounds = generate_SampledSounds(instrument)
+        try: 
+             sampled_sounds = generate_SampledSounds(instrument,preset)   # skip failing instruments
+        except Exception as e:
+            print(e)
+            continue
+       
             
 
         # if there are samples that have the same key and velocity
@@ -541,7 +548,7 @@ with open(sf2_filepath, 'rb') as sf2_file:
 
         # export samples stored and temp files
 
-        sample_folder_path=f"{target_dir}/{instrument_metadata['instrument_name']}/Common/SamplePools/User/{instrument_metadata['instrument_name']}"
+        sample_folder_path=f"{target_dir}/{preset.name}/Common/SamplePools/User/{preset.name}"
         ensure_folder(sample_folder_path)
         
         for s in preset.sound_preset.sample_set.sampled_sound:
@@ -563,8 +570,8 @@ with open(sf2_filepath, 'rb') as sf2_file:
 
         #export artipreset   
 
-        preset_folder_path=f"{target_dir}/{instrument_metadata['instrument_name']}/Common/Presets/{preset.mode}"          
-        preset_file_name=f"{instrument_metadata ['instrument_name']}_{instrument_metadata ['instrument_uuid']}.artipreset"
+        preset_folder_path=f"{target_dir}/{preset.name}/Common/Presets/{preset.mode}"          
+        preset_file_name=f"{preset.name}_{instrument_metadata ['instrument_uuid']}.artipreset"
         preset_file_path=f"{preset_folder_path}/{preset_file_name}"
 
         ensure_folder(preset_folder_path)
@@ -575,8 +582,10 @@ with open(sf2_filepath, 'rb') as sf2_file:
             print (f"{i.name} {i.fileName} {i.aux_key_range_top}  {i.aux_velocity_range_top}" )
 
         
+        # create stub png picture
+        image_filename=add_image_to_preset(instrument_metadata,preset)
 
-         
+        preset.visuals.cover_art.coverImageRef = image_filename
         
         
    
