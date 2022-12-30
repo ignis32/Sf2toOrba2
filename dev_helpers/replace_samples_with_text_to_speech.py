@@ -28,10 +28,10 @@ from standalone.OrbaPreset.OrbaPreset import PresetEntry
 #os.chdir("dev_helpers")
 
 mode = "Lead"
-artipreset="PanDrum_ea820c2d9ccd0e195b6e716bbc2e3a65.artipreset"
+artipreset="SF2_Synth-Square_1c87d6a93cc02422988adfe62f728213.artipreset"
 
-#language_for_voice='ru'
-language_for_voice='en'
+language_for_voice='ru'
+#language_for_voice='en'
 
 prefix_to_remove = "PanDrum"
 

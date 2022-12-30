@@ -1,0 +1,100 @@
+After tinkering with the .artipreset format for a while, I've finally written explanation of some internals of the .artipreset, regarding the SamplesSet, which is the core part of preset customization.
+
+As we all know, Orba2 presets are configured by an .artipreset file, which is basically an xml file.
+
+Artipresets that work with samples, at least modern ones, contain an xml element SampleSound that is explained below:
+
+[SampleSet] contains a list of wav samples where each sample is described by SampleSound elements array, and some metadata.
+
+>For example:
+
+<SampledSound sampleIndex="0" name="E1" loopStart="130607" loopEnd="331519" pitch="44.847287" fileName="SF2_Synth-Square_E1_E2_b8dd7e94e9ae3436e93b391003f376f3.wav" subdirectory="SF2_Synth-Square" pool="User"></SampledSound>
+
+  <SampledSound sampleIndex="1" name="G#1" loopStart="107400" loopEnd="287479" pitch="56.50404" fileName="SF2_Synth-Square_G#1_G#2_5ad6c793e97f1cc91d22abb82709eda4.wav" subdirectory="SF2_Synth-Square" pool="User"></SampledSound>
+
+  <SampledSound sampleIndex="2" name="C2" loopStart="106165" loopEnd="330438" pitch="71.19063" fileName="SF2_Synth-Square_C2_C3_876a99e3f4e165a58d2997beb1d94c64.wav" subdirectory="SF2_Synth-Square" pool="User"></SampledSound>
+XML
+[SampleSound] attributes information:
+
+[sampleIndex] attribute is used in SampleSet sampleMap attribute, for composing "groups" from the samples.
+
+[loopStart and loopEnd] define borders for "loop" part that happens if you hold a note for long enough to produce endless sounds, Orba plays this loop until you release the button. loopStart=0 and loopEnd=0 mean that there is no loop. Units here are not "time" based, these values are indexes of the data frames in the .wav file, or something like that.
+
+[fileName] obviously, defines the wav file name, but with one caveat - it is mandatory to have _{uuid}.wav at the end of the filename. Without it, Orba rejects the sample.
+
+UUID is a unique id of the sample, and each file should have its own uuid. UUID is a 16 symbol string, that contains numbers and lower case letters, like "b8dd7e94e9ae3436e93b391003f376f3" and by coincidence any md5 checksum can be used as UUID, at least if all samples have their own unique uuid.
+
+[pool] means a sample pool subdirectory where sample is stored, both on the device itself and in the local Artiphon profile folder. All factory samplepools are like "AritphonExt1","ArtiphonExt2","ArtiphonBasic". But in our case, we always want to user "User" pool. At least this is a designated location for the user content. One day removal from this samplepool will work, I hope.
+
+[subdirectory] is just a folder name for this specific sample set, and I keep it named the same as preset, but that's not an actual requirement.
+
+[pitch] - This is an interesting one, and describes what is the tuning of the sample in Hz. It DOES NOT seem to be used by Orba2 in the process of deciding which sample it should play (it is defined by sampleMap/noteThresholds/velocityThresholds). Instead it is only used to decide how already chosen sample should be transposed during playback, changing both pitch and a speed of the playback.
+
+For example, let's say, we are playing notes from 58 to 62, and according to sample mapping we are using the same sample for all this range, and its pitch is configured in SampledSound as 261.63.
+
+For midinote 60, this sample would be played with no transformations, as note 60 perfectly matches this frequency. For note 58 the same sample will be played about 1.12 slower and therefore with a lower pitch compared to the original. And for note 62, sample will be played 1.12 times faster and higher.
+
+Also, if negative, pitch attribute works differently. "-1" means that sample is never transposed, is static and sounds the same as in file.
+
+If negative but not equal to -1, it will mean a static pitch correction coefficient. Like "how many times faster this sample is compared to what we want it to be".
+
+For example pitch="-1.08844" seems to be fine as a correction coefficient for 44.1khz no-transpose samples. Basically it says "play this sample 1.08844 times slower"
+
+As soon as Orba uses 48khz for playback, 44.1 khz samples will be played 1.08844 times faster without such compensation. But when pitch="-1.08844" is applied, sample is slowed again back by 1.08844, and in the end you hear sample with the same pitch as it is supposed to be.
+
+Now to the sample mapping and thresholds in SampleSet element. They define how Orba2 decides which sample to play. At this point I should mention that I am not still sure about how it works for drums, it seems to choose samples in some other way, not still sure. But for Lead, Bass, and Chords that's how it seems to work.
+
+Here is a snippet from the SampleSet element .artipreset xml:
+
+<SampleSet name="PanDrum"
+  noteThresholds="45,46,48,50,52,53"
+  velocityThresholds="[50,90][50,90][50,90][50,90][50,90][50,90][50,90]"
+  sampleMap="[0,1,2][3,4,5][6,7,8][9,10,11][12,13,14][15,16,17][18,19,20]">
+XML
+ Let's start with sampleMap.
+
+[sampleMap] creates something like a groups of samples.
+
+In this case the first group contains samples with "index=0", "index=1", "index=2", second contains indexes 3,4,5, and so on.
+
+Samples in one group are triggered by the same midi note, but which one - will be defined by the incoming note velocity and velocityThresholds.
+
+Which sample group will be used to play will is defined by noteThresholds described later. For now let's pretend that we already know which group is triggered.
+
+[velocityThresholds]
+
+Amount of "groups" in velocityThresholds is the same as in sampleMap, and each group corresponds to the group from sampleMap in the same position.
+
+Each velocityThreshold's "group" defines velocity ranges that are used to choose which sample from the corresponding sampleMap group to play.
+
+velocityThresholds group is defined in a somewhat lazy way, omitting the edge values 0 and 127 of the ranges as they are always the same anyway.
+
+That's why amount of the numbers in velocityThresholds group is always one less than in the corresponding sampleMap group.
+
+For example
+
+       velocityThresholds="[50,90]...
+
+                sampleMap="[0,1,2]...
+
+actually means, that there are three velocity ranges, (0-50), (51-90), and (91-127).
+
+And, combined with the information from the corresponding sampleMap group, we know that sample with index=0 will be played if incoming note velocity is in the 0-50 range, index=1 sample is triggered by velocity 51 to 90, and sample with index=2 will play for velocity above 90.
+
+Also [] means group that contains one single range from 0 to 127, and corresponding sampleMap group will contain only one sample's index, like [0] or [10]
+
+Now for [noteThresholds]
+
+This one defines which sampleMap group will be triggered according to the incoming midi note value.
+
+Basically, it is an another lazy-defined list of ranges, with omitted 0 and 127 values on the edges.
+
+noteThresholds="45,46,48,50,52,53" means that there are the following ranges: (0-45),(46-46),(47-48),(49-50),(51-52),(53-53) and, attention, invisibly assumed (54-127)
+
+this last range towards 127 is not written, and that's why amount of numbers in noteThresholds is always one less than amount of groups in sampleMap and velocityThresholds.
+
+Each range corresponds to the sampleMap groups.
+
+For example, 45 note will use sampleMap group [0,1,2] and note 53 will use sampleMap group [15,16,17], and everything above 53 will trigger group [18,19,20].
+
+Therefore, to conclude, when you play a note with a certain velocity, Orba2 uses noteThresholds to decide which sampleMap group is responsible for this note, and after that uses corresponding velocityThresholds group to decide which particular sample (index) should be playe

@@ -35,8 +35,9 @@ MIDDLE_C_IS_C3 = -2
 ##----------------- configuration---------------------------------------
 replace_samples_with_speech=False
 OCTAVE_SHIFT= MIDDLE_C_IS_C5    #override this if samples pitch is wrong.
-template_file = "artipreset/Lead/PanDrum_ea820c2d9ccd0e195b6e716bbc2e3a65.artipreset"
-#template_file = "artipreset/Drum/JiveKit_e53cec68aa6340e1b1bfa4491b7efe22.artipreset"
+#template_file = "artipreset/Lead/PanDrum_ea820c2d9ccd0e195b6e716bbc2e3a65.artipreset"
+#template_file= "artipre set/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
+template_file = "artipreset/Drum/JiveKit_e53cec68aa6340e1b1bfa4491b7efe22.artipreset"
 
 
 #sf2_filename = r'(130 sounds) 27mg_Symphony_Hall_Bank.SF2'
@@ -48,15 +49,19 @@ template_file = "artipreset/Lead/PanDrum_ea820c2d9ccd0e195b6e716bbc2e3a65.artipr
 #sf2_filename = r'JawHarp-20200606.sf2'
 #sf2_filename = r'SynthSquare-20200512.sf2'
 sf2_filename = r'just t4.sf2'
-search_for_instrument="choir"  #  set to "" to export all
 
-sf2_folder_path=r'test_sf2'
+
+# instrument how it is shown by polyphone editor
+
+search_for_instrument="jazz kit0"  #  set to "" to export all
+
 
 ##----------------- configuration---------------------------------------
-
+sf2_folder_path=r'test_sf2'
 target_dir = r'output'
 sf2_filepath = f"{sf2_folder_path}/{sf2_filename}"
 #  just a workround for my VScode folder context
+
 if not exists("OrbaPreset/OrbaPreset.py"):
     os.chdir("standalone") 
 
@@ -179,7 +184,9 @@ def parse_instrument_samples(instrument: Sf2Instrument, preset: OrbaPreset.Prese
                 '@aux_root_note': root_note,
                 '@aux_instrument_name' : instrument_name,
                 '@aux_TMP_WAV_FILE': tmp_wav_file,
-                '@aux_pan': bag.pan        
+                '@aux_pan': bag.pan   ,
+
+                '@aux_root_note' :root_note    
         }
 
         sample_index += 1
@@ -427,6 +434,9 @@ def check_for_skip_instrument(raw_instrument_name):
 
 ######-----------------------------------------------------------------
 
+ 
+
+ 
 with open(sf2_filepath, 'rb') as sf2_file:
 
     # load template existing artipreset
@@ -475,6 +485,26 @@ with open(sf2_filepath, 'rb') as sf2_file:
         preset.sound_preset.sample_set.velocityThresholds = velocity_thresholds
         preset.sound_preset.sample_set.sampleMap = sample_mappings
 
+
+        # drum preset special-----------
+        if preset.mode == "Drums":
+            del (preset.sound_preset.kit_patch.cymbal_patch)
+            del (preset.sound_preset.kit_patch.drum_patch)
+            del (preset.sound_preset.kit_patch.shaker_patch)
+
+            del (preset.sound_preset.kit_patch.sample_drum_patch)
+            #print(preset.sound_preset.kit_patch.sample_drum_patch[0].get_as_dict())
+
+            for i in preset.sound_preset.sample_set.sampled_sound:
+                print("***************")
+                print (i.aux_root_note)
+
+       # {'@index': '0', '@drumMode': '0', '@ampVelocity': '200', '@snapVelocity': '0', '@snapLevel': '0', '@snapColor': '0', '@bendVelocity': '0', '@bendDepth': '0', '@bendTime': '0', '@gainRampStart': '0', '@gainRampEnd': '0', '@gainRampTime': '0', '@clipRampStart': '74', '@clipRampEnd': '56', '@clipRampTime': '0', '@fwRampStart': '0', '@fwRampEnd': '0', '@fwRampTime': '0', '@decayRelease': '63', '@decayHold': '255', '@flamCount': '0', '@flamRate': '0', '@level': '255', '@pan': '0', '@tailLevel': '41', '@tailDelay': '0', '@tailDecay': '23', '@fx': '0', '@note': '36', '@midiNote': '36', '@priority': '9'}
+
+
+
+
+
         # export samples stored and temp files
         sample_folder_path=f"{target_dir}/{preset.name}/Common/SamplePools/User/{preset.name}"
         ensure_folder(sample_folder_path)
@@ -494,12 +524,28 @@ with open(sf2_filepath, 'rb') as sf2_file:
 
 
         #export artipreset   
+        mode = preset.mode 
+        if mode == "Drums":
+            mode = "Drum"   # omg artiphon could not be consistent in the naming.
+        if mode == "Chords":
+            mode = "Chord"  # omg artiphon could not be consistent in the naming.
 
-        preset_folder_path=f"{target_dir}/{preset.name}/Common/Presets/{preset.mode}"          
+        preset_folder_path=f"{target_dir}/{preset.name}/Common/Presets/{mode}"          
         preset_file_name=f"{preset.name}_{preset.uuid}.artipreset"
         preset_file_path=f"{preset_folder_path}/{preset_file_name}"
         ensure_folder(preset_folder_path)
         preset.export_as_xml(preset_file_path)
+
+#for s in preset.sound_preset.sample_set.sampled_sound:   
+
+tuning_list = preset.tuning_entry.tuning.split(",")
+print(tuning_list)
+print(note_thresholds.split(","))
+
+ 
+for t in tuning_list:
+    print (f"searching for {t}")
+    print(f"idx: {note_thresholds.split(',').index(  (t) )  }")
 
 
 

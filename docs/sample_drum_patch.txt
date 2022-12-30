@@ -1,0 +1,32 @@
+SampleDrumSound statistics:
+
+[index]
+known values from 0 to 15, avg value: 6.525333333333333
+[drumMode]
+known values from 0 to 1, avg value: 0.008
+[ampVelocity]
+known values from 87 to 252, avg value: 200.328
+[snapVelocity]
+known values from 0 to 255, avg value: 14.661333333333333
+[snapLevel]
+known values from 0 to 179, avg value: 8.576
+[snapColor]
+known values from 0 to 4, avg value: 0.33066666666666666
+[bendVelocity]
+known values from 0 to 255, avg value: 12.773333333333333
+[bendDepth]
+known values from 0 to 255, avg value: 8.130666666666666
+[bendTime]
+known values from 0 to 244, avg value: 7.253333333333333
+[gainRampStart]
+known values from 0 to 0, avg value: 0.0
+[gainRampEnd]
+known values from 0 to 0, avg value: 0.0
+[gainRampTime]
+known values from 0 to 0, avg value: 0.0
+[clipRampStart]
+known values from 0 to 130, avg value: 1.2106666666666666
+[clipRampEnd]
+known values from 0 to 100, avg value: 1.0506666666666666
+[clipRampTime]
+known values from 0 to 24, avg value: 15.346666666666666

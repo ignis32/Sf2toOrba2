@@ -1,0 +1,108 @@
+@SubSkybox, thank you for editing my post, I think  we will just leave it here posted from you,  to reduce amount of unnecessary actions.
+
+Meanwhile, I guess that I've got some partial understanding of the drum presets sample mapping.
+
+TL;DR:
+ when we push a pad,  sample to play the pad is determined as below:
+1) note number is taken from the Tuning
+2) we lookup for  SampleDrumPatch element  by searching for the this note in  the noteMidi attributes
+3) we take index  attribute of the SampleDrum patch and lookup for the corresponding  sampleMap sample group using this index.
+4) choose sample by velocity using velocityThresholds.
+
+Long read:
+
+
+While decide chain that chooses which sample to play for the Lead/Bass - seems to be
+
+ Pads->Tuning->noteThresholds->velocityThresholds->sampleMap->SampledSound[ ]
+
+and the Chords is doing the same plus, you know, chords stuff, for Drums it is different.
+
+
+
+For Drums this chain seems to be 
+
+Pads->Tuning-> SampleDrumPatch[ ] -> velocityThresholds->sampleMap->SampledSound[ ]
+
+(it is simplified version without DrumPatch, CymbalPatch and ShakerPatch which are doing something useful as well, but I am skipping it for now,
+
+because it works without these elements and I have still no clue how do they work)
+
+
+
+First of all, Tuning.
+
+Tuning is responsible for the midi note numbers produced, and for drums it seems to be something static, with no octave shifts.
+
+Each number means midi note for pads from 1 to 8.
+
+Usually it will be stuff like 36,38,42,49,43,45,51,70, but for some demonstration purposes lets say it is like below, just the same numbers as pads just doubled.
+
+ tuning="11,22,33,44,55,66,77,88" 
+
+it works too, but will produce a preset which is kind of useless for controlling PC as midi controller sending some rarely used notes..
+
+Here I assign note 11 for pad 1, note 22 for pad 2 and so on.
+
+
+
+Also, 39 seems to be hardcoded for bump/shaker event, so it is kind of "11,22,33,44,55,66,77,88"+"39" under the hood. Btw, you even can assign same note to the different pads if you like.
+
+
+
+Next element in the chain will be the list of SampleDrumPatch elements, where we determine required one exact  SampleDrumPatch by noteMidi attribute. 
+
+
+
+For example, if we push Pad 2, and according to our tuning note is 22,  we are choosing SampleDrumPatch with noteMidi="22". In our case it will be SampleDrumPatch with index=1. This index is vital.    Order of SampleDrumPatch elements seems not to be vital, only index is.
+
+
+
+  <SampleDrumPatch index="0" note="0" noteMidi="11" ....
+
+  this one ->  <SampleDrumPatch index="1" note="0" noteMidi="22" ....
+
+  <SampleDrumPatch index="2" note="0" noteMidi="33" ....
+
+
+
+(There is also a "note" attribute, but it does not make any sense to me currently, and does nothing. I just suspect they are related to the DrumPatch/CymbalPatch stuff which I had omited.)
+
+
+
+Anyway, now we've determined SampleDrumPatch index. In all factory presets, amount of SampleDrumPatches is equal to amount of sample groups in sampleMap and velocityThresholds, and that's not a coincidence.
+
+
+Each SampleDrumPatch has his own dedcated sample group, determined by SampleDrumPatch's index attribute  (counting from zero).  
+
+
+
+This index corresponds to the sample group number, so in case of sample mapping like below,
+
+ sampleMap="[0][1][2][3][4][5][6][7][8]">
+
+we have different sample groups with one sample in each, and if we are searching for the sample group for SampleDrumPatch with index=1, it is the second group from the left - [1]
+
+
+In case if sample group has more than one sample, looks like the same velocityThresholds mechanics as in Lead presets kicks in, that allows to choose sample within a group based on the velocity.
+
+
+This is the sample group that is going to be triggered. At least when no DrumPatch/CymbalPatch stuff is in the KitPatch.
+
+
+Most confusing part is noteThresholds. From one side it seems to be ignored. It works for me fine with
+
+noteThresholds="99,100,101,102,103,104,105,106" setting, where there is completely no meaningful corellation with other elements, so it looks useless. However, it still somehow mandatory to have the correct amount of numbers in the noteThresholds (sample groups amount minus 1 ), and each number should be bigger then the previous, otherwise it does not work properly.
+
+
+
+For sure, I still can be mistaken in my theories, at least noteThresholds part is kind of strange, and note= attribute mystery is not solved yet at all.
+
+
+
+But that's all I've got for now.
+
+
+
+Also attaching an example xml that I used for testing and this post.
+
