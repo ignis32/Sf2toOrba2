@@ -427,6 +427,35 @@ class SampleSet(OrbaPresetElementBaseClass):
     sampleMap: str
 
 
+     
+     
+
+    def get_note_thresholds_as_ranges(self):
+        note_thresholds_list =  list(map(int,self.noteThresholds.split(',')))
+        note_thresholds_list.append(127)
+       # note_thresholds_list.insert(0, 0)
+
+        previous=0
+        ranges=[]
+        for i in note_thresholds_list:
+            ranges.append( range(previous, i+1) )   # these python ranges are  kind of  a strange thing. range (2,2) is empty. range (2,4)  means 2 and 3. last element is not included.
+            previous = i+1
+            
+        return ranges
+
+
+
+
+    def determine_sample_group_index_by_note(self, note):  # sample group is that stuff in noteThresholds and  velocityThresholds within square brackets.
+
+        #print (self.get_note_thresholds_as_ranges())
+        for idx, note_range in enumerate(self.get_note_thresholds_as_ranges()):
+            if note in note_range:
+                return idx
+
+        raise ValueError("there is a note that does not have any sample group")
+
+
 class SynthPatchCompatibility(OrbaPresetElementBaseClass):
     audioEngineMajor: int
     audioEngineMinor: int
@@ -547,6 +576,7 @@ class SoundPreset(OrbaPresetElementBaseClass):
     sample_set: SampleSet
     name: str
 
+    
 
 class TuningEntry(OrbaPresetElementBaseClass):
     key: str

@@ -1,0 +1,22 @@
+
+1) SF2 is capable of playing two samples in the same time. Orba2 is not.
+    In case if samples share the same key and velocity ranges, they can be mixed together with pydub.
+    (for stero pair samples, left and right. for example)
+    
+    If ranges overlap, it is just impossible to express sf2 instrument in Orba2 terms.
+
+2) SF2 is capable of assigning sample to the range, and Orba2 is capable too for Lead/Chord/Bass.
+    However Orba2 in Drums mode  sample mapping assigns only one note per sample group explicitly.
+    It means that for supporting Drum mode noteThreshold key ranges should be split to one-note ranges.
+    And sample groups should be duplicated multiple time to match that amount of ranges.
+    Each note would require it's own SampleDrumPatch record.
+
+3) Too many SampleDrumPatches breaks Orba2
+4) Too long velocity threshold groups break orba as well
+
+
+-----
+
+todo:
+
+
