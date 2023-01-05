@@ -10,3 +10,5 @@ __pycache__
 test_sf2
 output
 *.exe
+orba_deploy_preset.py
+classes

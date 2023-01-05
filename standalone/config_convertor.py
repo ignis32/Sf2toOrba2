@@ -15,13 +15,47 @@
 # search_for_instrument=r"jazz kit0"
 # mode="Drums"
 
+import tunings
 
 
-## MICROMACHINES https://musical-artifacts.com/artifacts/863
+# Tyros stuff TyrolandGS
+# Pads / Chords
+the_tunings =  tunings.tunings['739dc66cb7f613dd50afb537615686fa']
+
+
+
+# template_file= "artipreset/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
+# sf2_filename = r"TyrolandGS.sf2"
+# search_for_instrument=r"Soundtrack"
+
+# template_file= "artipreset/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
+# sf2_filename = r"TyrolandGS.sf2"
+# search_for_instrument=r"Space Voice"
+
+
+# template_file= "artipreset/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
+# sf2_filename = r"TyrolandGS.sf2"
+# search_for_instrument=r"choir0"
+
+
+template_file= "artipreset/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
+sf2_filename = r"TyrolandGS.sf2"
+search_for_instrument=r"Slow Strings"
+
+
+
+
+
+
+
+
+
+## MICROMACHINES https://musical-artifacts.com/artifacts/863   failure due to bad tuning of original instruments.
 
 # template_file = "artipreset/Drum/JiveKit_e53cec68aa6340e1b1bfa4491b7efe22.artipreset"
 # sf2_filename = r'MicroMachines2.sf2'
 # search_for_instrument=r"Standard"
+ 
 
 # template_file= "artipreset/Chord/BigStrings_f15370c7b7a54ca9b3ecb3112e5b638d.artipreset"
 # sf2_filename = r'MicroMachines2.sf2'
@@ -37,7 +71,7 @@
 # sf2_filename = r'MicroMachines2.sf2'
 # search_for_instrument=r"Overdriven Guitar"
 
-
+ 
 
 
 

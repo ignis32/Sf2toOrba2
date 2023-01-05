@@ -1,0 +1,108 @@
+# these are known factory preset collection tunings:
+
+tunings = {
+    "1efc1a01a23c5f12c4d0b44a076c2d6d": {
+        "Bass": {
+            "tuning": "48, 50, 52, 53, 55, 57, 59, 60",
+            "intervals": "P1, M2, M3, P4, P5, M6, M7, P8",
+            "key": "C",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Major",
+        },
+        "Chords": {
+            "tuning": "48, 50, 52, 53, 55, 57, 59, 60",
+            "intervals": "P1, M2, M3, P4, P5, M6, M7, P8",
+            "key": "C",
+            "chord_minor": "0, 3, 7, 0; 0, 3, 8, 0; 0, 4, 7, 0; 0, 3, 7, 0; 0, 3, 7, 0; 0, 4, 7, 0; 0, 4, 7, 0; 0, 3, 7, 0; ",
+            "chord_major": "0, 7, 12, 16; 0, 7, 12, 15; 0, 7, 12, 15; 0, 4, 7, 16; 0, 4, 7, 12; 0, 3, 7, 12; 0, 3, 12, -4; 0, 4, 12, -5; ",
+            "name": "Major",
+        },
+        "Lead": {
+            "tuning": "60, 62, 64, 67, 69, 72, 74, 76",
+            "intervals": "P1, M2, M3, P5, M6, P8, M9, M10",
+            "key": "C",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Major Pentatonic",
+        },
+    },
+    "4ca3e15c6794d6f08ef95c6475ad0b61": {
+        "Bass": {
+            "tuning": "48, 50, 52, 53, 55, 57, 59, 60",
+            "intervals": "P1, M2, M3, P4, P5, M6, M7, P8",
+            "key": "C",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Major",
+        },
+        "Chords": {
+            "tuning": "48, 50, 52, 53, 55, 57, 59, 60",
+            "intervals": "P1, M2, M3, P4, P5, M6, M7, P8",
+            "key": "C",
+            "chord_minor": "0, 7, 15, 24; 0, 8, 15, 24; 0, 7, 16, 24; 0, 7, 15, 19; 0, 7, 15, 19; 0, 7, 12, 16; 0, 7, 12, 16; -12, 3, 12, 19; ",
+            "chord_major": "0, 7, 16, 24; 0, 7, 15, 24; 0, 7, 15, 24; 0, 7, 16, 24; 0, 4, 12, 19; 0, 3, 12, 19; 0, 3, 8, 15; -12, 4, 12, 19; ",
+            "name": "Major",
+        },
+        "Lead": {
+            "tuning": "60, 62, 64, 67, 69, 72, 74, 76",
+            "intervals": "P1, M2, M3, P5, M6, P8, M9, M10",
+            "key": "C",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Major Pentatonic",
+        },
+    },
+    "739dc66cb7f613dd50afb537615686fa": {
+        "Bass": {
+            "tuning": "57, 59, 60, 62, 64, 65, 67, 69",
+            "intervals": "P1, M2, m3, P4, P5, m6, m7, P8",
+            "key": "A",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Major",
+        },
+        "Chords": {
+            "tuning": "57, 59, 60, 62, 64, 65, 67, 69",
+            "intervals": "P1, M2, m3, P4, P5, m6, m7, P8",
+            "key": "A",
+            "chord_minor": "0, 3, 7, 0; 0, 3, 8, 0; 0, 4, 7, 0; 0, 3, 7, 0; 0, 3, 7, 0; 0, 4, 7, 0; 0, 4, 7, 0; 0, 3, 7, 0; ",
+            "chord_major": "0, 7, 12, 16; 0, 7, 12, 15; 0, 7, 12, 15; 0, 4, 7, 16; 0, 4, 7, 12; 0, 3, 7, 12; 0, 3, 12, -4; 0, 4, 12, -5; ",
+            "name": "Natural Minor",
+        },
+        "Lead": {
+            "tuning": "69, 72, 74, 76, 79, 81, 84, 86",
+            "intervals": "P1, m3, P4, P5, m7, P8, m10, P11",
+            "key": "A",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Minor Pentatonic",
+        },
+    },
+    "0b9b7ef83936a6d57302e117d13aa6f9": {
+        "Bass": {
+            "tuning": "50, 52, 53, 55, 57, 58, 60, 62",
+            "intervals": "P1, M2, m3, P4, P5, m6, m7, P8",
+            "key": "D",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Natural Minor",
+        },
+        "Chords": {
+            "tuning": "50, 52, 53, 55, 57, 58, 60, 62",
+            "intervals": "P1, M2, m3, P4, P5, m6, m7, P8",
+            "key": "D",
+            "chord_minor": "0, 3, 7, 0; 0, 3, 8, 0; 0, 4, 7, 0; 0, 3, 7, 0; 0, 3, 7, 0; 0, 4, 7, 0; 0, 4, 7, 0; 0, 3, 7, 0; ",
+            "chord_major": "0, 7, 12, 16; 0, 7, 12, 15; 0, 7, 12, 15; 0, 4, 7, 16; 0, 4, 7, 12; 0, 3, 7, 12; 0, 3, 12, -4; 0, 4, 12, -5; ",
+            "name": "Natural Minor",
+        },
+        "Lead": {
+            "tuning": "62, 65, 67, 69, 72, 74, 77, 79",
+            "intervals": "P1, m3, P4, P5, m7, P8, m10, P11",
+            "key": "D",
+            "chord_minor": "n/a",
+            "chord_major": "n/a",
+            "name": "Minor Pentatonic",
+        },
+    },
+}

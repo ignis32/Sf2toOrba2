@@ -78,6 +78,7 @@ try:  # whatever happens, we should remove goddamn temp files
         sampled_sounds = []
         for s in sf2o2instrument.sf2o2_samples:
             sampled_sound =  OrbaPreset.SampledSound(s.generate_sampled_sound_dict(sf2o2instrument.slug_name, mode)) 
+            sampled_sound.subdirectory = preset.name  #ugly spaghetti here. need to fix.
             # export samples stored and temp files
             sample_folder_path=f"{config_convertor.target_dir}/{preset.name}/Common/SamplePools/User/{preset.name}"
             helpers.ensure_folder(sample_folder_path)
@@ -131,6 +132,17 @@ try:  # whatever happens, we should remove goddamn temp files
                 sample_drum_patch = OrbaPreset.SampleDrumPatch (data)
                 preset.sound_preset.kit_patch.sample_drum_patch.append(sample_drum_patch)
                 preset.tuning_entry.tuning="36,38,42,46,45,50,70,49"
+        else:
+            preset.tuning_entry.tuning = config_convertor.the_tunings[mode]['tuning']
+            preset.tuning_entry.intervals = config_convertor.the_tunings[mode]['intervals']
+            preset.tuning_entry.key = config_convertor.the_tunings[mode]['key']
+            preset.tuning_entry.name = config_convertor.the_tunings[mode]['name']
+
+            if mode =="Chords":
+                preset.modifier_chain.modifier_entry.chord_modifier_params.minorChordList  =   config_convertor.the_tunings[mode]['chord_minor']
+                preset.modifier_chain.modifier_entry.chord_modifier_params.majorChordList  =   config_convertor.the_tunings[mode]['chord_major']
+                  
+ 
 
 
         #export artipreset   
@@ -148,8 +160,17 @@ try:  # whatever happens, we should remove goddamn temp files
         preset.export_as_xml(preset_file_path)
 
 
+        zip_folder = f"{config_convertor.target_dir}/{preset.name}"
+        output_zip = f"{config_convertor.target_dir}/{preset.name}"
+        #import shutil
+        shutil.make_archive(output_zip, 'zip', zip_folder)
+        
+
+
     sf2_stuff.clean_tmp()  
 except Exception as e:
     sf2_stuff.clean_tmp()
     raise e
 
+print(" ")
+print (f"python orba_deploy_preset.py {output_zip}.zip" )
